@@ -4,7 +4,6 @@
 #include <time.h>
 #include <math.h>
 
-#define ALLOCATION_ERROR 1
 #define TRAIN_DATA_SET_SIZE 60000
 #define TEST_DATA_SET_SIZE 10000
 #define IMAGE_SIZE 784
@@ -171,7 +170,7 @@ int main()
 
     double** w1 = (double**) malloc(sizeof(double*) * OUTPUT_LAYER_SIZE);
     for (size_t i = 0; i < OUTPUT_LAYER_SIZE; i++)
-        w1[i] = (double*) malloc(sizeof(double) * HIDDEN_LAYER_SIZE);
+        w1[i] = (double*) malloc(sizeof(double) * HIDDEN_LAYER_SIZE);   
 
     printf("GENERATING INITIAL RANDOM VALUES...\n");
 
@@ -194,12 +193,10 @@ int main()
     ReadData(trainDataset, trainLabel, "./data/mnist_train.csv");
     ReadData(testDataset, testLabel, "./data/mnist_test.csv");
 
-    printf("EXECUTING FORWARDPROPAGATION AND BACKPROPAGATION...\n");
+    printf("EXECUTING FORWARDPROPAGATION/BACKPROPAGATION...\n");
 
     for (size_t epoch = 0; epoch < TOTAL_EPOCHS; epoch++)
     {
-        int correctGuess = 0;
-
         clock_t begin = clock();
 
         double costFunction = 0;
@@ -228,7 +225,7 @@ int main()
             BackPropagation(trainDataset[k], trainLabel[k], layer0, layer1, w0, b0, w1, b1);
         }
 
-        printf("COST: %f\t\t", costFunction);
+        int correctGuess = 0;
             
         for (size_t k = 0; k < TEST_DATA_SET_SIZE; k++)
         {
@@ -247,9 +244,8 @@ int main()
         clock_t end = clock();
         double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
-        printf("EPOCH:%d\t\tTIME:%f\t\tTESTACCURACY:%.2f%%\n", epoch, time_spent, (double)correctGuess*100/TEST_DATA_SET_SIZE);
+        printf("EPOCH:%d\tCOST:%.2f\tTIME:%.1f sec\tACCURACY:%.2f%%\n", epoch, costFunction, time_spent, (double)correctGuess*100/TEST_DATA_SET_SIZE);
     }
-
 
     printf("FINALIZING...\n");
 
@@ -257,6 +253,11 @@ int main()
         free(trainDataset[i]);
     free(trainDataset);
     free(trainLabel);
+
+    for (size_t i = 0; i < TEST_DATA_SET_SIZE; i++)
+        free(testDataset[i]);
+    free(testDataset);
+    free(testLabel);
 
     free(layer0);
     free(layer1);
